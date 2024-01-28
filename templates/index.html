@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>NBA STAT GAME</title>
+</head>
+
+<body>
+    <h2>Welcome To the Game</h2>
+    <form action="{{ url_for('views.play_game') }}" method="get">
+        <button type="submit">Play Game</button>
+    </form>
+
+ <!-- this section can be replaced by a child document -->
+{% block body %}
+
+
+<p>This is a Flask application.</p>
+
+
+{% endblock %}
+
+
+</body>
+
+</html>

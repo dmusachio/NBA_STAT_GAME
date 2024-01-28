@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the NBA Statistic Game</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        let highScore = 0;
+        function makeGuess(buttonNumber) {
+            $.post("/views/make_guess", { choice: buttonNumber }, function (data) {
+                $("#result").html(data.result + "<br>" + data.game_info);
+                // Update game info for the next round
+                $("#game-info").text(data.next_question);
+                // Update the wins count
+                $("#win-count").text(data.wins);
+
+                // Check for game over
+                if (data.game_info === 'Game Over') {
+                    // Disable the specific button that was clicked
+                    $(`button:contains('Player ${buttonNumber}')`).prop("disabled", true);
+                    // Disable the other button
+                    const otherButtonNumber = buttonNumber === 1 ? 2 : 1;
+                    $(`button:contains('Player ${otherButtonNumber}')`).prop("disabled", true);
+                    $("#play-again-button").show();
+                    highScore = Math.max(highScore, data.wins);
+                    $("#high-score").text("High Score: " + highScore);
+                }
+            });
+        }
+
+        function playAgain() {
+            // Enable buttons
+            $("button").prop("disabled", false);
+
+            // Hide Play Again button
+            $("#play-again-button").hide();
+
+            // Clear result and game info
+            $("#result").empty();
+            $("#game-info").empty();
+
+            // Reset wins count to 0
+            $("#win-count").text("0");
+
+            // Make a request to start a new game
+            $.post("/views/play", function (data) {
+                $("#game-info").text(data.next_question);
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Guess the NBA Statistic Game</h1>
+    <p id="game-info"></p>
+    <button onclick="makeGuess(1)">Player 1</button>
+    <button onclick="makeGuess(2)">Player 2</button>
+    <button onclick="playAgain()" id="play-again-button" style="display:none">Play Again</button>
+    <div id="result"></div>
+    <div id="wins">Score: <span id="win-count">0</span></div>
+    <div id="high-score">High Score: 0</div>
+
+    <script>
+        // Load initial game info
+        $(document).ready(function () {
+            $.post("/views/play", function (data) {
+                $("#game-info").text(data.next_question);
+            });
+        });
+    </script>
+</body>
+
+</html>
